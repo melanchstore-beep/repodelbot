@@ -3,7 +3,7 @@ import sys
 import asyncio
 import threading
 import logging
-import html as _html   # para que un nombre con caracteres raros no rompa el formato
+import html as _html   # para que un nombre con caracteres raros no rompa el formato HTML
 
 from flask import Flask, jsonify
 from telethon import TelegramClient, events
@@ -77,30 +77,33 @@ async def start(event):
 
 
 # ===================== BIENVENIDA A NUEVOS MIEMBROS =====================
-# ⚠️ REEMPLAZÁ este valor por el Chat ID de TU grupo.
-#    Los IDs de grupo son NEGATIVOS (ej: -1001234567890).
-#    NO requiere ser admin: el bot solo necesita ser miembro del grupo.
-WELCOME_CHAT_ID = -1001862654376   # <-- PONÉ ACÁ EL ID DE TU GRUPO
+WELCOME_CHAT_ID = -1001862654376   # ID de tu grupo (ya puesto)
 
 
 @client.on(events.ChatAction)
 async def bienvenida(event):
-    # 1) Solo actuar en el grupo que configuraste (ignora el resto de chats)
+    # DIAGNÓSTICO: registra CUALQUIER acción de chat que llegue, de cualquier grupo.
+    log.info(
+        "🔔 ChatAction | chat_id=%s | joined=%s | added=%s",
+        event.chat_id, event.user_joined, event.user_added,
+    )
+
     if event.chat_id != WELCOME_CHAT_ID:
+        log.info("   ↳ ignorado: no es mi grupo (%s)", WELCOME_CHAT_ID)
         return
 
-    # 2) Solo cuando alguien ENTRA: se une solo (link) o es agregado por otro
     if not (event.user_joined or event.user_added):
+        log.info("   ↳ ignorado: no es un ingreso (es salida u otra acción)")
         return
 
-    # 3) Resolver quién/quiénes entraron (puede ser más de uno a la vez)
     try:
         users = await event.get_users()
     except Exception as e:
-        log.warning("No pude resolver los usuarios nuevos: %s", e)
+        log.warning("   ⚠️ No pude resolver los usuarios nuevos: %r", e)
         return
 
-    # 4) Una bienvenida por cada usuario nuevo
+    log.info("   ✅ Ingreso detectado. Nuevos: %s", [(u.id, u.first_name) for u in users])
+
     for user in users:
         # Mención que funciona AUNQUE el usuario no tenga username:
         #   <a href="tg://user?id=ID">Nombre</a>
@@ -115,8 +118,9 @@ async def bienvenida(event):
 
         try:
             await client.send_message(event.chat_id, texto, parse_mode="html")
+            log.info("   📨 Bienvenida ENVIADA a user_id=%s", user.id)
         except Exception as e:
-            log.warning("No pude mandar la bienvenida: %s", e)
+            log.warning("   ❌ FALLO al enviar bienvenida: %r", e)
 # ========================================================================
 
 
