@@ -76,7 +76,7 @@ async def start(event):
 
 # ============== BIENVENIDA "POR PRIMER MENSAJE" (sin ser admin) ============
 # (Opcional: si querés SOLO el cartel rotativo, borrá este bloque entero.)
-WELCOME_CHAT_ID = -1001862654376   # tu grupo (confirmado ✅)
+WELCOME_CHAT_ID = -1002323692190   # tu grupo (confirmado ✅)
 NUEVO_MINUTOS = 10
 MODO = "auto"                      # "auto" = conservador | "loose" = agresivo
 
