@@ -3,6 +3,7 @@ import sys
 import asyncio
 import threading
 import logging
+import html as _html   # para que un nombre con caracteres raros no rompa el formato
 
 from flask import Flask, jsonify
 from telethon import TelegramClient, events
@@ -73,6 +74,50 @@ async def info(event):
 @client.on(events.NewMessage(pattern=r"(?i)^/start$"))
 async def start(event):
     await event.reply("⚙️ User-bot corriendo. Comandos: /ping /info /start")
+
+
+# ===================== BIENVENIDA A NUEVOS MIEMBROS =====================
+# ⚠️ REEMPLAZÁ este valor por el Chat ID de TU grupo.
+#    Los IDs de grupo son NEGATIVOS (ej: -1001234567890).
+#    NO requiere ser admin: el bot solo necesita ser miembro del grupo.
+WELCOME_CHAT_ID = -1001862654376   # <-- PONÉ ACÁ EL ID DE TU GRUPO
+
+
+@client.on(events.ChatAction)
+async def bienvenida(event):
+    # 1) Solo actuar en el grupo que configuraste (ignora el resto de chats)
+    if event.chat_id != WELCOME_CHAT_ID:
+        return
+
+    # 2) Solo cuando alguien ENTRA: se une solo (link) o es agregado por otro
+    if not (event.user_joined or event.user_added):
+        return
+
+    # 3) Resolver quién/quiénes entraron (puede ser más de uno a la vez)
+    try:
+        users = await event.get_users()
+    except Exception as e:
+        log.warning("No pude resolver los usuarios nuevos: %s", e)
+        return
+
+    # 4) Una bienvenida por cada usuario nuevo
+    for user in users:
+        # Mención que funciona AUNQUE el usuario no tenga username:
+        #   <a href="tg://user?id=ID">Nombre</a>
+        nombre = _html.escape(user.first_name or "amigo")
+        mencion = f'<a href="tg://user?id={user.id}">{nombre}</a>'
+
+        texto = (
+            f"Hola {mencion}, bienvenido al grupo, "
+            f'si quieres una cuenta gratis le puedes escribir a '
+            f'<a href="https://t.me/Akiubame">@Akiubame</a> 👋'
+        )
+
+        try:
+            await client.send_message(event.chat_id, texto, parse_mode="html")
+        except Exception as e:
+            log.warning("No pude mandar la bienvenida: %s", e)
+# ========================================================================
 
 
 # ----------------------------- Main --------------------------------
