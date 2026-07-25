@@ -159,8 +159,8 @@ INTERVALO_MIN = 15                    # cada cuántos minutos renueva el cartel
 # Editá libremente los CUERPOS (no uses < > & sueltos; son HTML).
 # El llamado a @Akiubame va como link clicable, inyectado abajo.
 CARTEL_CUERPOS = [
-    "👋 ¡Bienvenidos al grupo!",
-    "🎉 ¿Nuevo por aquí? Bienvenido/a.",
+    "👋 ¡Bienvenidos al grupo! Si necesitas ayuda:",
+    "🎉 ¿Nuevo por aquí? Bienvenido/a, para obtener una cuenta:",
     "📢 ¿Buscas una cuenta gratis?",
 ]
 CARTEL_CTA = 'Escríbele a <a href="https://t.me/Akiubame">@Akiubame</a> 👈'
